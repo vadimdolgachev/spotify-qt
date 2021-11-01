@@ -132,8 +132,15 @@ auto spt::ClientHandler::start() -> QString
 		arguments.append("--disable-discovery");
 	}
 
-	QProcess::connect(process, &QProcess::readyReadStandardOutput, this, &ClientHandler::readyRead);
-	QProcess::connect(process, &QProcess::readyReadStandardError, this, &ClientHandler::readyError);
+    QProcess::connect(process, &QProcess::readyReadStandardOutput, this, &ClientHandler::readyRead);
+    QProcess::connect(process, &QProcess::readyReadStandardError, this, &ClientHandler::readyError);
+    QProcess::connect(process, &QProcess::stateChanged,
+                      this, [this, arguments](QProcess::ProcessState state) {
+                          if (state == QProcess::ProcessState::NotRunning) {
+                              process->close();
+                              QTimer::singleShot(1000, [=]{process->start(path, arguments);});
+                          }
+        });
 
 	lib::log::debug("starting: {} {}", path.toStdString(),
 		arguments.join(' ').toStdString());
