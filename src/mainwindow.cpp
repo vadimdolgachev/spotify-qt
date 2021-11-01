@@ -91,8 +91,8 @@ MainWindow::MainWindow(lib::settings &settings, lib::paths &paths)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-	delete trayIcon;
-	event->accept();
+    setVisible(false);
+    event->ignore();
 }
 
 void MainWindow::initClient()
