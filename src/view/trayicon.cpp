@@ -1,5 +1,7 @@
 #include "trayicon.hpp"
 
+#include <QWindow>
+
 TrayIcon::TrayIcon(spt::Spotify *spotify, const lib::settings &settings, QWidget *parent)
 	: QSystemTrayIcon(parent),
 	spotify(spotify),
@@ -59,7 +61,22 @@ TrayIcon::TrayIcon(spt::Spotify *spotify, const lib::settings &settings, QWidget
 		auto *window = dynamic_cast<QWidget *>(this->parent());
 		if (window != nullptr)
 		{
-			window->setVisible(!window->isVisible());
+			if (window->isVisible() && window->isActiveWindow())
+			{
+				window->hide();
+			}
+			else
+			{
+				if (!window->isVisible()) {
+					window->windowHandle()->setPosition(window->windowHandle()->position());
+				}
+				if (!window->isActiveWindow()) {
+					window->hide();
+				}
+				window->show();
+				window->raise();
+				QTimer::singleShot(0, [window] {window->windowHandle()->requestActivate();});
+			}
 		}
 	});
 
