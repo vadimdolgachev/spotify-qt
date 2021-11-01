@@ -54,6 +54,10 @@ TrayIcon::TrayIcon(spt::Spotify *spotify, const lib::settings &settings, QWidget
 
 	QSystemTrayIcon::connect(this, &QSystemTrayIcon::activated, [this](ActivationReason reason)
 	{
+		if (reason == ActivationReason::MiddleClick) {
+				playPause->trigger();
+				return;
+		}
 		if (reason != ActivationReason::Trigger)
 		{
 			return;
