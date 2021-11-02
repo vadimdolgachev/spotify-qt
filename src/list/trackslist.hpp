@@ -51,7 +51,7 @@ protected:
 
 private:
 	void menu(const QPoint &pos);
-	void clicked(QTreeWidgetItem *item, int column);
+    void doubleClicked(QTreeWidgetItem *item, int column);
 	void headerMenu(const QPoint &pos);
 	void resizeHeaders(const QSize &newSize);
 	auto getCurrent() -> const spt::Current &;

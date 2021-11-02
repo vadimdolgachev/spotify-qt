@@ -39,7 +39,7 @@ TracksList::TracksList(lib::spt::api &spotify, lib::settings &settings, lib::cac
 	}
 
 	// Play tracks on click or enter/special key
-	QTreeWidget::connect(this, &QTreeWidget::itemActivated, this, &TracksList::clicked);
+    QTreeWidget::connect(this, &QTreeWidget::itemDoubleClicked, this, &TracksList::doubleClicked);
 
 	// Song context menu
 	setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
@@ -70,9 +70,9 @@ void TracksList::menu(const QPoint &pos)
 	songMenu->popup(mapToGlobal(pos));
 }
 
-void TracksList::clicked(QTreeWidgetItem *item, int /*column*/)
+void TracksList::doubleClicked(QTreeWidgetItem *item, int /*column*/)
 {
-	if (item->isDisabled())
+    if (item->isDisabled())
 	{
 		return;
 	}
