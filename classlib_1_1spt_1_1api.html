@@ -175,8 +175,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>top_tracks</b> (lib::
 <tr class="separator:af58d77d78d2f690e1d006be63b946aa0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd52d73893c4175cc039557b51dda56e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlib_1_1spt_1_1api.html#abd52d73893c4175cc039557b51dda56e">recently_played</a> (lib::callback&lt; std::vector&lt; <a class="el" href="classlib_1_1spt_1_1track.html">lib::spt::track</a> &gt;&gt; &amp;callback)</td></tr>
 <tr class="separator:abd52d73893c4175cc039557b51dda56e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aae8d9a1ea500342ccb9a4fd0468b3395"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlib_1_1spt_1_1api.html#aae8d9a1ea500342ccb9a4fd0468b3395">add_to_queue</a> (const std::string &amp;uri, lib::callback&lt; std::string &gt; &amp;callback)</td></tr>
+<tr class="memitem:aae8d9a1ea500342ccb9a4fd0468b3395"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlib_1_1spt_1_1api.html#aae8d9a1ea500342ccb9a4fd0468b3395">add_to_queue</a> (const std::string &amp;<a class="el" href="classlib_1_1uri.html">uri</a>, lib::callback&lt; std::string &gt; &amp;callback)</td></tr>
 <tr class="separator:aae8d9a1ea500342ccb9a4fd0468b3395"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6d859577d0d4fd809d3dfc3a3045805"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlib_1_1spt_1_1api.html#ae6d859577d0d4fd809d3dfc3a3045805">create_playlist</a> (const std::string &amp;name, const <a class="el" href="classlib_1_1optional.html">lib::optional</a>&lt; std::string &gt; &amp;description, const <a class="el" href="classlib_1_1optional.html">lib::optional</a>&lt; bool &gt; &amp;is_public, const <a class="el" href="classlib_1_1optional.html">lib::optional</a>&lt; bool &gt; &amp;is_collaborative, lib::callback&lt; <a class="el" href="classlib_1_1spt_1_1playlist.html">lib::spt::playlist</a> &gt; &amp;callback)</td></tr>
+<tr class="separator:ae6d859577d0d4fd809d3dfc3a3045805"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5871faebdb0c92b86b3a3028ac228e27"><td class="memItemLeft" align="right" valign="top"><a id="a5871faebdb0c92b86b3a3028ac228e27"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>playlists</b> (lib::callback&lt; std::vector&lt; <a class="el" href="classlib_1_1spt_1_1playlist.html">lib::spt::playlist</a> &gt;&gt; &amp;callback)</td></tr>
 <tr class="separator:a5871faebdb0c92b86b3a3028ac228e27"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -220,6 +222,8 @@ Static Public Member Functions</h2></td></tr>
 <tr class="separator:aafba6d10ca71c7884709d17f128252cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad91955a68b747dd0955fc3fcbe9ef508"><td class="memItemLeft" align="right" valign="top">static auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlib_1_1spt_1_1api.html#ad91955a68b747dd0955fc3fcbe9ef508">to_id</a> (const std::string &amp;id) -&gt; std::string</td></tr>
 <tr class="separator:ad91955a68b747dd0955fc3fcbe9ef508"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e7ca30f08a9a8bd9af49a2c5e87a353"><td class="memItemLeft" align="right" valign="top">static auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlib_1_1spt_1_1api.html#a3e7ca30f08a9a8bd9af49a2c5e87a353">get_device_url</a> (const std::string &amp;url, const <a class="el" href="classlib_1_1spt_1_1device.html">lib::spt::device</a> &amp;<a class="el" href="classlib_1_1spt_1_1device.html">device</a>) -&gt; std::string</td></tr>
+<tr class="separator:a3e7ca30f08a9a8bd9af49a2c5e87a353"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -235,6 +239,8 @@ Protected Member Functions</h2></td></tr>
 <tr class="separator:ae6de5354ebff77d8d21124141dfa8d09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1370bf233537673881fc2867adc433bf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlib_1_1spt_1_1api.html#a1370bf233537673881fc2867adc433bf">put</a> (const std::string &amp;url, lib::callback&lt; std::string &gt; &amp;callback)</td></tr>
 <tr class="separator:a1370bf233537673881fc2867adc433bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebe2c2e0bfc8f2b3343e41a69d5c610c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlib_1_1spt_1_1api.html#aebe2c2e0bfc8f2b3343e41a69d5c610c">post</a> (const std::string &amp;url, const nlohmann::json &amp;<a class="el" href="classlib_1_1json.html">json</a>, lib::callback&lt; nlohmann::json &gt; &amp;callback)</td></tr>
+<tr class="separator:aebe2c2e0bfc8f2b3343e41a69d5c610c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64f1734b8278db05880989f44a70e552"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlib_1_1spt_1_1api.html#a64f1734b8278db05880989f44a70e552">post</a> (const std::string &amp;url, lib::callback&lt; std::string &gt; &amp;callback)</td></tr>
 <tr class="separator:a64f1734b8278db05880989f44a70e552"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f97861134a29ce268d5730ef9c251a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlib_1_1spt_1_1api.html#a3f97861134a29ce268d5730ef9c251a7">del</a> (const std::string &amp;url, const nlohmann::json &amp;<a class="el" href="classlib_1_1json.html">json</a>, lib::callback&lt; std::string &gt; &amp;callback)</td></tr>
@@ -321,6 +327,62 @@ Protected Attributes</h2></td></tr>
 <p>Add specified track to play next </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">uri</td><td>URI of track to add </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae6d859577d0d4fd809d3dfc3a3045805"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6d859577d0d4fd809d3dfc3a3045805">&#9670;&nbsp;</a></span>create_playlist()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void lib::spt::api::create_playlist </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classlib_1_1optional.html">lib::optional</a>&lt; std::string &gt; &amp;&#160;</td>
+          <td class="paramname"><em>description</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classlib_1_1optional.html">lib::optional</a>&lt; bool &gt; &amp;&#160;</td>
+          <td class="paramname"><em>is_public</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classlib_1_1optional.html">lib::optional</a>&lt; bool &gt; &amp;&#160;</td>
+          <td class="paramname"><em>is_collaborative</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">lib::callback&lt; <a class="el" href="classlib_1_1spt_1_1playlist.html">lib::spt::playlist</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>callback</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Create a new playlist </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>Playlist name </td></tr>
+    <tr><td class="paramname">description</td><td>Playlist description </td></tr>
+    <tr><td class="paramname">is_public</td><td>Public playlist visible to everyone </td></tr>
+    <tr><td class="paramname">is_collaborative</td><td>Collaborative playlist </td></tr>
+    <tr><td class="paramname">callback</td><td>Created playlist </td></tr>
   </table>
   </dd>
 </dl>
@@ -525,6 +587,49 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Temporarily protected </dd></dl>
+
+</div>
+</div>
+<a id="a3e7ca30f08a9a8bd9af49a2c5e87a353"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e7ca30f08a9a8bd9af49a2c5e87a353">&#9670;&nbsp;</a></span>get_device_url()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static auto lib::spt::api::get_device_url </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>url</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classlib_1_1spt_1_1device.html">lib::spt::device</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> -&gt;  std::string</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get new URL with device ID added, or replaced </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">url</td><td>URL to modify </td></tr>
+    <tr><td class="paramname">device</td><td>Device to add/replace </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -830,8 +935,58 @@ Temporarily protected </dd></dl>
 
 </div>
 </div>
+<a id="aebe2c2e0bfc8f2b3343e41a69d5c610c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebe2c2e0bfc8f2b3343e41a69d5c610c">&#9670;&nbsp;</a></span>post() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void lib::spt::api::post </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>url</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>json</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">lib::callback&lt; nlohmann::json &gt; &amp;&#160;</td>
+          <td class="paramname"><em>callback</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>POST request </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">url</td><td>URL to request </td></tr>
+    <tr><td class="paramname">json</td><td>JSON body or null if no body </td></tr>
+    <tr><td class="paramname">callback</td><td>Error message, or empty if none </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a64f1734b8278db05880989f44a70e552"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a64f1734b8278db05880989f44a70e552">&#9670;&nbsp;</a></span>post()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a64f1734b8278db05880989f44a70e552">&#9670;&nbsp;</a></span>post() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -863,13 +1018,7 @@ Temporarily protected </dd></dl>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>POST request </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">url</td><td>URL to request </td></tr>
-    <tr><td class="paramname">callback</td><td>Error message, or empty if none </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Convenience method for POST request with no body </p>
 
 </div>
 </div>

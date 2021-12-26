@@ -1,8 +1,10 @@
 var searchData=
 [
-  ['timestamp_493',['timestamp',['../classlib_1_1crash__info.html#a662b5ee92e9eb2c07de40bd7c0b987fa',1,'lib::crash_info']]],
-  ['tracks_494',['tracks',['../classlib_1_1spt_1_1playlist.html#af31fb77d7316d524020f52b99eeae675',1,'lib::spt::playlist::tracks()'],['../classlib_1_1spt_1_1search__results.html#ac5dad86a1b2cb4724d08ff6ed817435d',1,'lib::spt::search_results::tracks()']]],
-  ['tracks_5fhref_495',['tracks_href',['../classlib_1_1spt_1_1playlist.html#a6bd3cca9afe5a1584d71d0e4d880cf14',1,'lib::spt::playlist']]],
-  ['tracks_5ftotal_496',['tracks_total',['../classlib_1_1spt_1_1playlist.html#abc4dec5cee51165c5f02460b429e14b9',1,'lib::spt::playlist']]],
-  ['type_497',['type',['../classlib_1_1spt_1_1context.html#a3da85d5a0e71c4a58b6e5e0868accefe',1,'lib::spt::context::type()'],['../classlib_1_1spt_1_1device.html#aeb916c1ee10bf9814dfb294b1a55132d',1,'lib::spt::device::type()']]]
+  ['settings_523',['settings',['../classlib_1_1spt_1_1api.html#a5a058e247f84895b9ee98f7b5a6ed756',1,'lib::spt::api']]],
+  ['shows_524',['shows',['../classlib_1_1spt_1_1search__results.html#a04606a5c13267ef4eef854de5f7088d7',1,'lib::spt::search_results']]],
+  ['shuffle_525',['shuffle',['../classlib_1_1spt_1_1playback.html#a593d145ce768c35439952a27ab29294d',1,'lib::spt::playback']]],
+  ['signal_526',['signal',['../classlib_1_1crash__info.html#a58bc7d2a0b45b541b913382fe0c3b57c',1,'lib::crash_info']]],
+  ['snapshot_527',['snapshot',['../classlib_1_1spt_1_1playlist.html#ae2eff6fa44f518622c1df2ecfe677f62',1,'lib::spt::playlist']]],
+  ['spotify_528',['spotify',['../classlib_1_1settings.html#a15cb6ff4193e655f271d8d76787c2507',1,'lib::settings']]],
+  ['stack_5ftrace_529',['stack_trace',['../classlib_1_1crash__info.html#a6470c0cfcaea6a053ddd9da81e626ef2',1,'lib::crash_info']]]
 ];
