@@ -3,7 +3,6 @@
 #include "lib/settings.hpp"
 
 #include "menu/mainmenu.hpp"
-#include "spotify/spotify.hpp"
 #include "util/icon.hpp"
 #include "widget/volumebutton.hpp"
 #include "widget/clickableslider.hpp"
@@ -46,20 +45,25 @@ private:
 	void onRepeat(bool checked);
 	void onMinimize(bool checked);
 
-	QAction *search = nullptr;
-	QAction *playPause = nullptr;
-	QWidget *parent = nullptr;
-	QSlider *progress = nullptr;
-	QLabel *position = nullptr;
-	QAction *shuffle = nullptr;
-	QAction *repeat = nullptr;
-	VolumeButton *volumeButton = nullptr;
+	QToolButton *menu;
+	QAction *search;
+
+	QAction *previous;
+	QAction *playPause;
+	QAction *next;
+
+	QSlider *progress;
+	QLabel *position;
+
+	QAction *shuffle;
+	QAction *repeat;
+	VolumeButton *volumeButton;
 
 	lib::spt::api &spotify;
 	lib::settings &settings;
 
-	DragArea *leftSpacer = nullptr;
-	DragArea *rightSpacer = nullptr;
+	DragArea *leftSpacer;
+	DragArea *rightSpacer;
 
 	QAction *titleBarSeparator = nullptr;
 	QAction *minimize = nullptr;

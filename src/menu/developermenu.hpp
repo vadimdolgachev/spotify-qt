@@ -1,14 +1,19 @@
 #pragma once
 
-#include "dialog/deviceselectdialog.hpp"
-#include "dialog/openlinkdialog.hpp"
-#include "dialog/setupdialog.hpp"
+#include "dialog/deviceselect.hpp"
+#include "dialog/openlink.hpp"
+#include "dialog/setup.hpp"
 #include "dialog/trackscachedialog.hpp"
-#include "dialog/whatsnewdialog.hpp"
+#include "dialog/whatsnew.hpp"
 #include "util/icon.hpp"
 #include "lib/settings.hpp"
 #include "lib/spotify/api.hpp"
 #include "lib/httpclient.hpp"
+#include "view/debugview.hpp"
+
+#ifdef USE_DBUS
+#include "notifications/dbusnotifications.hpp"
+#endif
 
 #include <QMenu>
 #include <QMainWindow>
@@ -34,4 +39,8 @@ private:
 	auto infoMenu() -> QMenu *;
 	auto crashMenu() -> QMenu *;
 	auto statusMenu() -> QMenu *;
+
+#ifdef USE_DBUS
+	auto notificationsMenu() -> QMenu *;
+#endif
 };

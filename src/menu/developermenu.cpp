@@ -1,5 +1,6 @@
 #include "developermenu.hpp"
 #include "mainwindow.hpp"
+#include "dialog/createplaylist.hpp"
 
 DeveloperMenu::DeveloperMenu(lib::settings &settings, lib::spt::api &spotify,
 	lib::cache &cache, const lib::http_client &httpClient, QWidget *parent)
@@ -50,10 +51,34 @@ DeveloperMenu::DeveloperMenu(lib::settings &settings, lib::spt::api &spotify,
 			});
 	});
 
+	addMenuItem(this, "Show track notification", [this]()
+	{
+		auto *mainWindow = MainWindow::find(parentWidget());
+
+		auto *trayIcon = mainWindow->getTrayIcon();
+		if (trayIcon == nullptr)
+		{
+			StatusMessage::warn(QStringLiteral("Tray icon not loaded"));
+			return;
+		}
+
+		const auto &track = mainWindow->currentPlayback().item;
+
+		HttpUtils::getAlbum(track.image, this->httpClient, this->cache,
+			[trayIcon, &track](const QPixmap &pixmap)
+			{
+				trayIcon->message(track, pixmap);
+			});
+	});
+
 	addMenu(infoMenu());
 	addMenu(dialogMenu());
 	addMenu(crashMenu());
 	addMenu(statusMenu());
+
+#ifdef USE_DBUS
+	addMenu(notificationsMenu());
+#endif
 }
 
 void DeveloperMenu::addMenuItem(QMenu *menu, const QString &text,
@@ -72,11 +97,12 @@ auto DeveloperMenu::dialogMenu() -> QMenu *
 	auto *mainWindow = MainWindow::find(parentWidget());
 
 	std::vector<QDialog *> dialogs = {
-		new DeviceSelectDialog({}, mainWindow),
-		new OpenLinkDialog("/", LinkType::Path, mainWindow),
-		new SetupDialog(settings, mainWindow),
+		new Dialog::DeviceSelect({}, mainWindow),
+		new Dialog::OpenLink("/", LinkType::Path, mainWindow),
+		new Dialog::Setup(settings, mainWindow),
 		new TracksCacheDialog(cache, mainWindow),
-		new WhatsNewDialog(settings, httpClient, mainWindow),
+		new Dialog::WhatsNew(settings, httpClient, mainWindow),
+		new Dialog::CreatePlaylist(settings, mainWindow),
 	};
 
 	for (auto *dialog: dialogs)
@@ -163,3 +189,31 @@ auto DeveloperMenu::statusMenu() -> QMenu *
 
 	return menu;
 }
+
+#ifdef USE_DBUS
+
+auto DeveloperMenu::notificationsMenu() -> QMenu *
+{
+	auto *menu = new QMenu("Notifications", this);
+
+	addMenuItem(menu, "Capabilities", [this]()
+	{
+		DbusNotifications notifications(this);
+		auto *mainWindow = MainWindow::find(parentWidget());
+
+		QMessageBox::information(mainWindow, QStringLiteral("Capabilities"),
+			notifications.getCapabilities().join('\n'));
+	});
+
+	addMenuItem(menu, "Notify", [this]()
+	{
+		DbusNotifications notifications(this);
+		notifications.notify(QStringLiteral("Title"),
+			QStringLiteral("<b>Bold text</b><br/>Normal text"),
+			QString(), -1);
+	});
+
+	return menu;
+}
+
+#endif

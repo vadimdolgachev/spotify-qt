@@ -1,4 +1,5 @@
 #include "lib/spotify/api.hpp"
+#include "lib/uri.hpp"
 
 using namespace lib::spt;
 
@@ -197,6 +198,29 @@ auto api::get_current_device() const -> const std::string &
 	return settings.general.last_device;
 }
 
+auto lib::spt::api::get_device_url(const std::string &url,
+	const lib::spt::device &device) -> std::string
+{
+	lib::uri uri(url);
+	auto params = uri.get_search_params();
+
+	auto device_ids = params.find("device_ids");
+	if (device_ids != params.end())
+	{
+		device_ids->second = device.id;
+	}
+	else
+	{
+		params.insert({
+			"device_ids",
+			device.id,
+		});
+	}
+
+	uri.set_search_params(params);
+	return uri.get_url();
+}
+
 //region GET
 
 void api::get(const std::string &url, lib::callback<nlohmann::json> &callback)
@@ -276,9 +300,16 @@ void api::put(const std::string &url, const nlohmann::json &body,
 		{
 			auto error = error_message(url, response);
 
-			if (lib::strings::contains(error, "No active device found")
-				|| lib::strings::contains(error, "Device not found"))
+			const auto noDevice = lib::strings::contains(error, "No active device found");
+			const auto invalidDevice = lib::strings::contains(error, "Device not found");
+
+			if (noDevice || invalidDevice)
 			{
+				if (invalidDevice)
+				{
+					set_current_device(std::string());
+				}
+
 				devices([this, url, body, error, callback]
 					(const std::vector<lib::spt::device> &devices)
 				{
@@ -300,16 +331,12 @@ void api::put(const std::string &url, const nlohmann::json &body,
 								return;
 							}
 
-							// Remember old device to replace in new URL
-							const auto &old_device = settings.general.last_device;
-
-							this->set_device(device, [this, url, body, callback, device, old_device]
+							this->set_device(device, [this, url, body, callback, device]
 								(const std::string &status)
 							{
 								if (status.empty())
 								{
-									this->put(lib::strings::replace_all(url, old_device, device.id),
-										body, callback);
+									this->put(get_device_url(url, device), body, callback);
 								}
 							});
 						});
@@ -342,6 +369,38 @@ void api::post(const std::string &url, lib::callback<std::string> &callback)
 		callback(error_message(url, response));
 	});
 }
+
+void api::post(const std::string &url, const nlohmann::json &json,
+	lib::callback<nlohmann::json> &callback)
+{
+	auto headers = auth_headers();
+	headers["Content-Type"] = "application/json";
+
+	auto data = json.is_null()
+		? std::string()
+		: json.dump();
+
+	http.post(to_full_url(url), data, headers,
+		[url, callback](const std::string &response)
+		{
+			try
+			{
+				callback(response.empty()
+					? nlohmann::json()
+					: nlohmann::json::parse(response));
+			}
+			catch (const nlohmann::json::parse_error &e)
+			{
+				lib::log::error("{} failed to parse: {}", url, e.what());
+				lib::log::debug("JSON: {}", response);
+			}
+			catch (const std::exception &e)
+			{
+				lib::log::error("{} failed: {}", url, e.what());
+			}
+		});
+}
+
 
 //endregion
 

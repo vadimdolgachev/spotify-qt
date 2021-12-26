@@ -1,10 +1,11 @@
 #pragma once
 
-#include "spotify/spotify.hpp"
-#include "util/icon.hpp"
+#include "lib/spotify/api.hpp"
 #include "lib/strings.hpp"
-#include "enum/datarole.hpp"
 #include "lib/cache.hpp"
+
+#include "util/icon.hpp"
+#include "enum/datarole.hpp"
 
 #include <utility>
 
@@ -50,14 +51,19 @@ private:
 	QAction *toggleLiked = nullptr;
 
 	auto getTrackUrl() const -> QString;
-
-	void like(bool checked);
-	void addToQueue(bool checked);
-	void addToPlaylist(QAction *action);
-	void remFromPlaylist(bool checked);
-	void openTrackFeatures(bool checked);
-	void openLyrics(bool checked);
 	void viewArtist(const lib::spt::entity &artist);
-	void openAlbum(bool checked);
 	void setLiked(bool liked);
+
+	void addToPlaylist(const std::string &playlistId) const;
+	void addToNewPlaylist();
+
+	void onAudioFeatures(bool checked);
+	void onLyrics(bool checked);
+	void onCopySongLink(bool checked);
+	void onOpenInSpotify(bool checked);
+	void onLike(bool checked);
+	void onAddToQueue(bool checked);
+	void onAddToPlaylist(QAction *action);
+	void onRemoveFromPlaylist(bool checked);
+	void onOpenAlbum(bool checked);
 };

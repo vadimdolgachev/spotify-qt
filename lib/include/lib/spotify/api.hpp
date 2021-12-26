@@ -228,6 +228,20 @@ namespace lib
 
 			//region Playlists
 
+			/**
+			 * Create a new playlist
+			 * @param name Playlist name
+			 * @param description Playlist description
+			 * @param is_public Public playlist visible to everyone
+			 * @param is_collaborative Collaborative playlist
+			 * @param callback Created playlist
+			 */
+			void create_playlist(const std::string &name,
+				const lib::optional<std::string> &description,
+				const lib::optional<bool> &is_public,
+				const lib::optional<bool> &is_collaborative,
+				lib::callback<lib::spt::playlist> &callback);
+
 			void playlists(lib::callback<std::vector<lib::spt::playlist>> &callback);
 
 			void playlist(const std::string &playlist_id,
@@ -308,6 +322,14 @@ namespace lib
 			 */
 			static auto to_id(const std::string &id) -> std::string;
 
+			/**
+			 * Get new URL with device ID added, or replaced
+			 * @param url URL to modify
+			 * @param device Device to add/replace
+			 */
+			static auto get_device_url(const std::string &url,
+				const lib::spt::device &device) -> std::string;
+
 		protected:
 			/**
 			 * Allow use to select device, by default, none is chosen
@@ -379,7 +401,14 @@ namespace lib
 			/**
 			 * POST request
 			 * @param url URL to request
+			 * @param json JSON body or null if no body
 			 * @param callback Error message, or empty if none
+			 */
+			void post(const std::string &url, const nlohmann::json &json,
+				lib::callback<nlohmann::json> &callback);
+
+			/**
+			 * Convenience method for POST request with no body
 			 */
 			void post(const std::string &url, lib::callback<std::string> &callback);
 

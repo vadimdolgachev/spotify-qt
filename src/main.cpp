@@ -5,7 +5,7 @@
 #include <QCoreApplication>
 
 #include "mainwindow.hpp"
-#include "dialog/setupdialog.hpp"
+#include "dialog/setup.hpp"
 
 #ifdef USE_KCRASH
 #include <kcrash.h>
@@ -17,7 +17,7 @@ auto main(int argc, char *argv[]) -> int
 {
 	// Set name for settings etc.
 	QCoreApplication::setOrganizationName("kraxarn");
-	QCoreApplication::setApplicationName("spotify-qt");
+	QCoreApplication::setApplicationName(APP_NAME);
 	QCoreApplication::setApplicationVersion(APP_VERSION);
 
 	// High-DPI support
@@ -69,8 +69,8 @@ auto main(int argc, char *argv[]) -> int
 
 	if (parser.isSet("paths"))
 	{
-		lib::log::info("Config: {}", paths.config_file());
-		lib::log::info("Cache:  {}", paths.cache());
+		lib::log::info("Config: {}", paths.config_file().string());
+		lib::log::info("Cache:  {}", paths.cache().string());
 		return 0;
 	}
 
@@ -78,7 +78,7 @@ auto main(int argc, char *argv[]) -> int
 	if (settings.account.refresh_token.empty()
 		|| parser.isSet("reset-credentials"))
 	{
-		SetupDialog dialog(settings);
+		Dialog::Setup dialog(settings, nullptr);
 		if (dialog.exec() == QDialog::Rejected)
 		{
 			return 0;
