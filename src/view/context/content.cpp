@@ -38,7 +38,7 @@ void Context::Content::onSongMenu(const QPoint &pos)
 		return;
 	}
 
-	auto *menu = new SongMenu(track, spotify, cache, parentWidget());
+	auto *menu = new Menu::Track(track, spotify, cache, parentWidget());
 	menu->popup(mapToGlobal(pos));
 }
 
@@ -55,11 +55,12 @@ void Context::Content::reset()
 	}
 }
 
-void Context::Content::setAlbum(const QPixmap &pixmap)
+void Context::Content::setAlbum(const lib::spt::entity &albumEntity, const QPixmap &albumImage)
 {
 	if (album != nullptr)
 	{
-		album->setPixmap(ImageUtils::mask(pixmap));
+		album->setPixmap(Image::mask(albumImage));
+		album->setToolTip(QString::fromStdString(albumEntity.name));
 	}
 }
 

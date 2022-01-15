@@ -16,8 +16,7 @@ public:
 	//region Deprecated
 
 	/** @deprecated Use TracksList.load instead */
-	bool loadAlbum(const std::string &albumId,
-		const std::string &trackId = std::string());
+	void loadAlbum(const std::string &albumId, const std::string &trackId = std::string());
 
 	/** @deprecated Use SidePanel.openArtist instead */
 	void openArtist(const std::string &artistId);
@@ -95,7 +94,6 @@ private:
 	lib::spt::user currentUser;
 	lib::http_client *httpClient = nullptr;
 
-	QNetworkAccessManager *network = nullptr;
 	TrayIcon *trayIcon = nullptr;
 	int refreshCount = -1;
 	bool stateValid = true;
@@ -117,6 +115,6 @@ private:
 
 	// Methods
 	QWidget *createCentralWidget();
-	void setAlbumImage(const std::string &url);
+	void setAlbumImage(const lib::spt::entity &albumEntity, const std::string &albumImageUrl);
 	void setSptContext(const std::string &uri);
 };

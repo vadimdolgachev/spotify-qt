@@ -26,19 +26,19 @@ TEST_CASE("spt::api")
 	{
 		lib::spt::device device;
 		device.id = "device_id";
-		std::string base_url = "https://api.spotify.com/v1/me/player/play";
+		std::string base_url = "me/player/play";
 
 		CHECK_EQ(lib::spt::api::get_device_url(base_url, device),
-			lib::fmt::format("{}?device_ids={}", base_url, device.id));
+			lib::fmt::format("{}?device_id={}", base_url, device.id));
 
 		CHECK_EQ(lib::spt::api::get_device_url(lib::fmt::format(
 			"{}?offset=0",
 			base_url), device),
-			lib::fmt::format("{}?device_ids={}&offset=0", base_url, device.id));
+			lib::fmt::format("{}?device_id={}&offset=0", base_url, device.id));
 
 		CHECK_EQ(lib::spt::api::get_device_url(lib::fmt::format(
-			"{}?offset=0&device_ids=invalid_device",
+			"{}?offset=0&device_id=invalid_device",
 			base_url), device),
-			lib::fmt::format("{}?device_ids={}&offset=0", base_url, device.id));
+			lib::fmt::format("{}?device_id={}&offset=0", base_url, device.id));
 	}
 }

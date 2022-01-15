@@ -1,4 +1,5 @@
 #include "mainwindow.hpp"
+#include "util/widget.hpp"
 
 MainWindow::MainWindow(lib::settings &settings, lib::paths &paths)
 	: settings(settings),
@@ -14,7 +15,7 @@ MainWindow::MainWindow(lib::settings &settings, lib::paths &paths)
 
 	// Apply selected style and palette
 	QApplication::setStyle(QString::fromStdString(settings.general.style));
-	StyleUtils::applyPalette(settings.general.style_palette);
+	Style::applyPalette(settings.general.style_palette);
 
 	// Custom dark theme
 	if (settings.general.style_palette == lib::palette::dark)
@@ -28,13 +29,12 @@ MainWindow::MainWindow(lib::settings &settings, lib::paths &paths)
 	}
 
 	// Check for dark background
-	StyleUtils::setDarkBackground(this);
+	Style::setDarkBackground(this);
 
 	// Set Spotify
 	splash.showMessage("Connecting...");
 	httpClient = new lib::qt::http_client(this);
 	spotify = new spt::Spotify(settings, *httpClient, this);
-	network = new QNetworkAccessManager(this);
 
 	// Check connection
 	stateValid = spotify->tryRefresh();
@@ -285,7 +285,7 @@ void MainWindow::refreshed(const lib::spt::playback &playback)
 		}
 
 		contextView->setCurrentlyPlaying(currPlaying);
-		setAlbumImage(currPlaying.image);
+		setAlbumImage(currPlaying.album, currPlaying.image);
 		setWindowTitle(QString::fromStdString(currPlaying.title()));
 		contextView->updateContextIcon();
 
@@ -299,7 +299,7 @@ void MainWindow::refreshed(const lib::spt::playback &playback)
 		if (trayIcon != nullptr
 			&& (settings.general.tray_album_art || settings.general.notify_track_change))
 		{
-			HttpUtils::getAlbum(current.playback.item.image, *httpClient, cache,
+			Http::getAlbum(current.playback.item.image, *httpClient, cache, false,
 				[this, &currPlaying, trackChange](const QPixmap &image)
 				{
 					if (trayIcon == nullptr)
@@ -323,11 +323,8 @@ void MainWindow::refreshed(const lib::spt::playback &playback)
 	toolBar->setProgress(current.playback);
 	toolBar->setPlaying(current.playback.is_playing);
 
-	if (!settings.general.pulse_volume)
-	{
-		constexpr int volumeStep = 5;
-		toolBar->setVolume(current.playback.volume() / volumeStep);
-	}
+	constexpr int volumeStep = 5;
+	toolBar->setVolume(current.playback.volume() / volumeStep);
 
 	toolBar->setRepeat(current.playback.repeat);
 	toolBar->setShuffle(current.playback.shuffle);
@@ -340,7 +337,7 @@ auto MainWindow::createCentralWidget() -> QWidget *
 	sidePanel = new SidePanel::View(*spotify, settings, cache,
 		*httpClient, this);
 
-	libraryList = new List::Library(*spotify, this);
+	libraryList = new List::Library(*spotify, cache, this);
 	playlistList = new List::Playlist(*spotify, settings, cache, this);
 	contextView = new Context::View(*spotify, current, cache, this);
 
@@ -391,13 +388,21 @@ void MainWindow::openLyrics(const lib::spt::track &track)
 	dynamic_cast<SidePanel::View *>(sidePanel)->openLyrics(track);
 }
 
-auto MainWindow::loadAlbum(const std::string &albumId, const std::string &trackId) -> bool
+void MainWindow::loadAlbum(const std::string &albumId, const std::string &trackId)
 {
-	spotify->album(albumId, [this, trackId](const lib::spt::album &album)
+	auto *tracksList = mainContent->getTracksList();
+
+	const auto album = cache.get_album(albumId);
+	if (album.is_valid())
 	{
-		mainContent->getTracksList()->load(album, trackId);
+		tracksList->load(album, trackId);
+		return;
+	}
+
+	spotify->album(albumId, [tracksList, trackId](const lib::spt::album &album)
+	{
+		tracksList->load(album, trackId);
 	});
-	return true;
 }
 
 auto MainWindow::loadTracksFromCache(const std::string &id) -> std::vector<lib::spt::track>
@@ -411,15 +416,17 @@ void MainWindow::saveTracksToCache(const std::string &id,
 	cache.set_tracks(id, tracks);
 }
 
-void MainWindow::setAlbumImage(const std::string &url)
+void MainWindow::setAlbumImage(const lib::spt::entity &albumEntity,
+	const std::string &albumImageUrl)
 {
-	HttpUtils::getAlbum(url, *httpClient, cache, [this](const QPixmap &image)
-	{
-		if (this->contextView != nullptr)
+	Http::getAlbum(albumImageUrl, *httpClient, cache,
+		[this, albumEntity](const QPixmap &image)
 		{
-			contextView->setAlbum(image);
-		}
-	});
+			if (contextView != nullptr)
+			{
+				contextView->setAlbum(albumEntity, image);
+			}
+		});
 }
 
 void MainWindow::openArtist(const std::string &artistId)

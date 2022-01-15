@@ -3,7 +3,6 @@
 #include "util/icon.hpp"
 #include "lib/settings.hpp"
 #include "settingspage/base.hpp"
-#include "view/logview.hpp"
 #include "util/widget.hpp"
 
 namespace SettingsPage
@@ -30,9 +29,6 @@ namespace SettingsPage
 		static constexpr int minMaxQueue = 1;
 		static constexpr int maxMaxQueue = 1000;
 
-		static auto isPulse() -> bool;
-
 		auto app() -> QWidget *;
-		auto appLogs() -> QWidget *;
 	};
 }

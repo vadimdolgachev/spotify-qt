@@ -1,24 +1,26 @@
 #include "list/library.hpp"
 #include "mainwindow.hpp"
+#include "enum/libraryrole.hpp"
 
-List::Library::Library(lib::spt::api &spotify, QWidget *parent)
+List::Library::Library(lib::spt::api &spotify, lib::cache &cache, QWidget *parent)
 	: QTreeWidget(parent),
-	spotify(spotify)
+	spotify(spotify),
+	cache(cache)
 {
 	addTopLevelItems({
-		TreeUtils::itemWithNoChildren(this, recentlyPlayed,
+		Tree::itemWithNoChildren(this, recentlyPlayed,
 			"Most recently played tracks from any device"),
-		TreeUtils::itemWithNoChildren(this, savedTracks,
+		Tree::itemWithNoChildren(this, savedTracks,
 			"Liked and saved tracks"),
-		TreeUtils::itemWithNoChildren(this, topTracks,
+		Tree::itemWithNoChildren(this, topTracks,
 			"Most played tracks for the past 6 months"),
-		TreeUtils::itemWithNoChildren(this, newReleases,
+		Tree::itemWithNoChildren(this, newReleases,
 			"New albums from artists you listen to"),
-		TreeUtils::itemWithEmptyChild(this, savedAlbums,
+		Tree::itemWithEmptyChild(this, savedAlbums,
 			"Liked and saved albums"),
-		TreeUtils::itemWithEmptyChild(this, topArtists,
+		Tree::itemWithEmptyChild(this, topArtists,
 			"Most played artists for the past 6 months"),
-		TreeUtils::itemWithEmptyChild(this, followedArtists,
+		Tree::itemWithEmptyChild(this, followedArtists,
 			"Artists you're currently following")
 	});
 
@@ -26,14 +28,18 @@ List::Library::Library(lib::spt::api &spotify, QWidget *parent)
 	setCurrentItem(nullptr);
 
 	QTreeWidget::connect(this, &QTreeWidget::itemClicked,
-		this, &List::Library::clicked);
+		this, &List::Library::onClicked);
 	QTreeWidget::connect(this, &QTreeWidget::itemDoubleClicked,
-		this, &List::Library::doubleClicked);
+		this, &List::Library::onDoubleClicked);
 	QTreeWidget::connect(this, &QTreeWidget::itemExpanded,
-		this, &List::Library::expanded);
+		this, &List::Library::onExpanded);
+
+	setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+	QWidget::connect(this, &QWidget::customContextMenuRequested,
+		this, &List::Library::onMenuRequested);
 }
 
-void List::Library::clicked(QTreeWidgetItem *item, int /*column*/)
+void List::Library::onClicked(QTreeWidgetItem *item, int /*column*/)
 {
 	if (item != nullptr
 		&& item->parent() == nullptr
@@ -52,15 +58,20 @@ void List::Library::clicked(QTreeWidgetItem *item, int /*column*/)
 	mainWindow->setCurrentPlaylistItem(-1);
 	if (item->parent() != nullptr)
 	{
-		auto data = item->data(0, 0x100).toString().toStdString();
-		switch (static_cast<DataRole>(item->data(0, 0x101).toInt()))
+		const auto entityId = item->data(0, static_cast<int>(LibraryRole::EntityId))
+			.toString().toStdString();
+
+		const auto dataRole = item->data(0, static_cast<int>(LibraryRole::DataRole))
+			.toInt();
+
+		switch (static_cast<DataRole>(dataRole))
 		{
 			case DataRole::ArtistId:
-				mainWindow->openArtist(data);
+				mainWindow->openArtist(entityId);
 				break;
 
 			case DataRole::AlbumId:
-				mainWindow->loadAlbum(data);
+				mainWindow->loadAlbum(entityId);
 				break;
 
 			case DataRole::Track:
@@ -152,7 +163,7 @@ void List::Library::tracksLoaded(const std::string &id, const std::vector<lib::s
 	mainWindow->getSongsTree()->setEnabled(true);
 }
 
-void List::Library::doubleClicked(QTreeWidgetItem *item, int /*column*/)
+void List::Library::onDoubleClicked(QTreeWidgetItem *item, int /*column*/)
 {
 	auto callback = [this](const std::vector<lib::spt::track> &tracks)
 	{
@@ -198,7 +209,7 @@ void List::Library::doubleClicked(QTreeWidgetItem *item, int /*column*/)
 	}
 }
 
-void List::Library::expanded(QTreeWidgetItem *item)
+void List::Library::onExpanded(QTreeWidgetItem *item)
 {
 	item->takeChildren();
 
@@ -210,20 +221,23 @@ void List::Library::expanded(QTreeWidgetItem *item)
 			results.reserve(artists.size());
 			for (const auto &artist: artists)
 			{
-				results.emplace_back(artist.name, artist.id, DataRole::ArtistId);
+				results.emplace_back(artist, DataRole::ArtistId);
 			}
 			List::Library::itemsLoaded(results, item);
 		});
 	}
 	else if (item->text(0) == savedAlbums)
 	{
-		spotify.saved_albums([item](const std::vector<lib::spt::saved_album> &albums)
+		spotify.saved_albums([item](const std::vector<lib::spt::saved_album> &savedAlbums)
 		{
 			std::vector<ListItem::Library> results;
-			results.reserve(albums.size());
-			for (const auto &album: albums)
+			results.reserve(savedAlbums.size());
+			for (const auto &savedAlbum: savedAlbums)
 			{
-				results.emplace_back(album.album.name, album.album.id, DataRole::AlbumId);
+				const auto &album = savedAlbum.album;
+				const auto tooltip = lib::fmt::format("{}\nBy {}",
+					album.name, album.artist);
+				results.emplace_back(album, tooltip, DataRole::AlbumId);
 			}
 			List::Library::itemsLoaded(results, item);
 		});
@@ -236,7 +250,7 @@ void List::Library::expanded(QTreeWidgetItem *item)
 			results.reserve(artists.size());
 			for (const auto &artist: artists)
 			{
-				results.emplace_back(artist.name, artist.id, DataRole::ArtistId);
+				results.emplace_back(artist, DataRole::ArtistId);
 			}
 			List::Library::itemsLoaded(results, item);
 		});
@@ -246,9 +260,9 @@ void List::Library::expanded(QTreeWidgetItem *item)
 void List::Library::itemsLoaded(std::vector<ListItem::Library> &items, QTreeWidgetItem *item)
 {
 	std::sort(items.begin(), items.end(),
-		[](const ListItem::Library &x, const ListItem::Library &y) -> bool
+		[](const ListItem::Library &item1, const ListItem::Library &item2) -> bool
 		{
-			return x.name < y.name;
+			return item1.getNameString() < item2.getNameString();
 		}
 	);
 
@@ -268,10 +282,42 @@ void List::Library::itemsLoaded(std::vector<ListItem::Library> &items, QTreeWidg
 	for (auto &result: items)
 	{
 		auto *child = new QTreeWidgetItem(item, {
-			QString::fromStdString(result.name)
+			result.getName(),
 		});
-		child->setData(0, 0x100, QString::fromStdString(result.id));
-		child->setData(0, 0x101, static_cast<int>(result.role));
+		child->setToolTip(0, result.getTooltip());
+		child->setData(0, static_cast<int>(LibraryRole::EntityId), result.getId());
+		child->setData(0, static_cast<int>(LibraryRole::DataRole), result.getRole());
 		item->addChild(child);
 	}
+}
+
+void List::Library::onMenuRequested(const QPoint &pos)
+{
+	auto *item = itemAt(pos);
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	const auto roleVariant = item->data(0, static_cast<int>(LibraryRole::DataRole));
+	if (!roleVariant.canConvert<int>())
+	{
+		return;
+	}
+
+	// Currently, only albums have a context menu
+	if (static_cast<DataRole>(roleVariant.toInt()) != DataRole::AlbumId)
+	{
+		return;
+	}
+
+	const auto idVariant = item->data(0, static_cast<int>(LibraryRole::EntityId));
+	if (!idVariant.canConvert<QString>())
+	{
+		return;
+	}
+
+	const auto entityId = idVariant.toString().toStdString();
+	auto *menu = new Menu::Album(spotify, cache, entityId, this);
+	menu->popup(mapToGlobal(pos));
 }

@@ -82,13 +82,13 @@ MainToolBar::MainToolBar(lib::spt::api &spotify, lib::settings &settings,
 	// Title bar buttons
 	titleBarSeparator = addSeparator();
 
-	minimize = new QAction(Icon::get("window-minimize-symbolic"),
+	minimize = new QAction(Icon::get("window-minimize"),
 		QStringLiteral("Minimize"), this);
 
 	QAction::connect(minimize, &QAction::triggered,
 		this, &MainToolBar::onMinimize);
 
-	close = new QAction(Icon::get("window-close-symbolic"),
+	close = new QAction(Icon::get("window-close"),
 		QStringLiteral("Close"), this);
 
 	QAction::connect(close, &QAction::triggered, &QCoreApplication::quit);
@@ -148,6 +148,31 @@ void MainToolBar::updateSpacerSizes()
 	rightSpacer->setMinimumWidth(spacerWidth);
 }
 
+auto MainToolBar::getNextRepeatState(lib::repeat_state repeatState) -> lib::repeat_state
+{
+	switch (repeatState)
+	{
+		case lib::repeat_state::off:
+			return lib::repeat_state::context;
+
+		case lib::repeat_state::context:
+			return lib::repeat_state::track;
+
+		default:
+			return lib::repeat_state::off;
+	}
+}
+
+auto MainToolBar::getRepeatIcon(lib::repeat_state repeatState) -> QIcon
+{
+	if (repeatState == lib::repeat_state::track)
+	{
+		return Icon::get(QStringLiteral("media-playlist-repeat-song"));
+	}
+
+	return Icon::get(QStringLiteral("media-playlist-repeat"));
+}
+
 void MainToolBar::setPlaying(bool playing)
 {
 	playPause->setIcon(Icon::get(playing
@@ -180,6 +205,15 @@ void MainToolBar::setVolume(int volume)
 void MainToolBar::setRepeat(lib::repeat_state state)
 {
 	repeat->setChecked(state != lib::repeat_state::off);
+	repeat->setIcon(getRepeatIcon(state));
+	repeatState = state;
+}
+
+auto MainToolBar::toggleRepeat() -> lib::repeat_state
+{
+	const auto newState = getNextRepeatState(repeatState);
+	setRepeat(newState);
+	return newState;
 }
 
 void MainToolBar::setShuffle(bool value)
@@ -300,14 +334,12 @@ void MainToolBar::onShuffle(bool checked)
 	});
 }
 
-void MainToolBar::onRepeat(bool checked)
+void MainToolBar::onRepeat(bool /*checked*/)
 {
 	auto *mainWindow = MainWindow::find(parentWidget());
 	auto &current = mainWindow->getCurrentPlayback();
-	auto repeatMode = checked
-		? lib::repeat_state::context
-		: lib::repeat_state::off;
 
+	const auto repeatMode = toggleRepeat();
 	current.repeat = repeatMode;
 	mainWindow->refreshed(current);
 

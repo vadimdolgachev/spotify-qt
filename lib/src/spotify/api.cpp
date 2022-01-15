@@ -1,15 +1,13 @@
 #include "lib/spotify/api.hpp"
 #include "lib/uri.hpp"
 
-using namespace lib::spt;
-
-api::api(lib::settings &settings, const lib::http_client &http_client)
+lib::spt::api::api(lib::settings &settings, const lib::http_client &http_client)
 	: settings(settings),
 	http(http_client)
 {
 }
 
-void api::refresh(bool force)
+void lib::spt::api::refresh(bool force)
 {
 	constexpr long s_in_hour = 60 * 60;
 
@@ -62,7 +60,7 @@ void api::refresh(bool force)
 	settings.save();
 }
 
-auto api::auth_headers() -> lib::headers
+auto lib::spt::api::auth_headers() -> lib::headers
 {
 	constexpr int secsInHour = 3600;
 
@@ -89,7 +87,7 @@ auto api::auth_headers() -> lib::headers
 	};
 }
 
-auto api::parse_json(const std::string &url, const std::string &data) -> nlohmann::json
+auto lib::spt::api::parse_json(const std::string &url, const std::string &data) -> nlohmann::json
 {
 	// No data, no response, no error
 	if (data.empty())
@@ -109,7 +107,7 @@ auto api::parse_json(const std::string &url, const std::string &data) -> nlohman
 	throw lib::spt::error(err, url);
 }
 
-auto api::request_refresh(const std::string &post_data,
+auto lib::spt::api::request_refresh(const std::string &post_data,
 	const std::string &authorization) -> std::string
 {
 	return http.post("https://accounts.spotify.com/api/token", {
@@ -118,7 +116,7 @@ auto api::request_refresh(const std::string &post_data,
 	}, post_data);
 }
 
-auto api::error_message(const std::string &url, const std::string &data) -> std::string
+auto lib::spt::api::error_message(const std::string &url, const std::string &data) -> std::string
 {
 	nlohmann::json json;
 	try
@@ -147,20 +145,20 @@ auto api::error_message(const std::string &url, const std::string &data) -> std:
 	return message;
 }
 
-void api::select_device(const std::vector<lib::spt::device> &/*devices*/,
+void lib::spt::api::select_device(const std::vector<lib::spt::device> &/*devices*/,
 	lib::callback<lib::spt::device> &callback)
 {
 	callback(lib::spt::device());
 }
 
-auto api::to_uri(const std::string &type, const std::string &id) -> std::string
+auto lib::spt::api::to_uri(const std::string &type, const std::string &id) -> std::string
 {
 	return lib::strings::starts_with(id, "spotify:")
 		? id
 		: lib::fmt::format("spotify:{}:{}", type, id);
 }
 
-auto api::to_id(const std::string &id) -> std::string
+auto lib::spt::api::to_id(const std::string &id) -> std::string
 {
 	auto i = id.rfind(':');
 	return i != std::string::npos
@@ -168,12 +166,12 @@ auto api::to_id(const std::string &id) -> std::string
 		: id;
 }
 
-auto api::to_full_url(const std::string &relative_url) -> std::string
+auto lib::spt::api::to_full_url(const std::string &relative_url) -> std::string
 {
 	return lib::fmt::format("https://api.spotify.com/v1/{}", relative_url);
 }
 
-auto api::follow_type_string(lib::follow_type type) -> std::string
+auto lib::spt::api::follow_type_string(lib::follow_type type) -> std::string
 {
 	switch (type)
 	{
@@ -187,13 +185,13 @@ auto api::follow_type_string(lib::follow_type type) -> std::string
 	return {};
 }
 
-void api::set_current_device(const std::string &id)
+void lib::spt::api::set_current_device(const std::string &id)
 {
 	settings.general.last_device = id;
 	settings.save();
 }
 
-auto api::get_current_device() const -> const std::string &
+auto lib::spt::api::get_current_device() const -> const std::string &
 {
 	return settings.general.last_device;
 }
@@ -201,29 +199,32 @@ auto api::get_current_device() const -> const std::string &
 auto lib::spt::api::get_device_url(const std::string &url,
 	const lib::spt::device &device) -> std::string
 {
-	lib::uri uri(url);
-	auto params = uri.get_search_params();
+	lib::uri uri(lib::strings::starts_with(url, "https://")
+		? url
+		: to_full_url(url));
 
-	auto device_ids = params.find("device_ids");
-	if (device_ids != params.end())
+	auto params = uri.get_search_params();
+	auto device_id = params.find("device_id");
+	if (device_id != params.end())
 	{
-		device_ids->second = device.id;
+		device_id->second = device.id;
 	}
 	else
 	{
 		params.insert({
-			"device_ids",
+			"device_id",
 			device.id,
 		});
 	}
 
 	uri.set_search_params(params);
-	return uri.get_url();
+	auto pathname = uri.pathname();
+	return lib::strings::remove(pathname, "/v1/");
 }
 
 //region GET
 
-void api::get(const std::string &url, lib::callback<nlohmann::json> &callback)
+void lib::spt::api::get(const std::string &url, lib::callback<nlohmann::json> &callback)
 {
 	http.get(to_full_url(url), auth_headers(),
 		[url, callback](const std::string &response)
@@ -246,7 +247,7 @@ void api::get(const std::string &url, lib::callback<nlohmann::json> &callback)
 		});
 }
 
-void api::get_items(const std::string &url, const std::string &key,
+void lib::spt::api::get_items(const std::string &url, const std::string &key,
 	lib::callback<nlohmann::json> &callback)
 {
 	constexpr size_t api_prefix_length = 27;
@@ -262,10 +263,11 @@ void api::get_items(const std::string &url, const std::string &key,
 			lib::log::error(R"(no such key "{}" in "{}" ({}))", key, json.dump());
 		}
 
-		const auto &items = (key.empty() ? json : json.at(key)).at("items");
-		if (json.contains("next") && json.at("next").is_string())
+		const auto &content = key.empty() ? json : json.at(key);
+		const auto &items = content.at("items");
+		if (content.contains("next") && content.at("next").is_string())
 		{
-			const auto &next = json.at("next").get<std::string>();
+			const auto &next = content.at("next").get<std::string>();
 			get_items(next, key, [items, callback](const nlohmann::json &next)
 			{
 				callback(lib::json::combine(items, next));
@@ -276,7 +278,7 @@ void api::get_items(const std::string &url, const std::string &key,
 	});
 }
 
-void api::get_items(const std::string &url, lib::callback<nlohmann::json> &callback)
+void lib::spt::api::get_items(const std::string &url, lib::callback<nlohmann::json> &callback)
 {
 	get_items(url, std::string(), callback);
 }
@@ -285,7 +287,7 @@ void api::get_items(const std::string &url, lib::callback<nlohmann::json> &callb
 
 //region PUT
 
-void api::put(const std::string &url, const nlohmann::json &body,
+void lib::spt::api::put(const std::string &url, const nlohmann::json &body,
 	lib::callback<std::string> &callback)
 {
 	auto header = auth_headers();
@@ -336,6 +338,7 @@ void api::put(const std::string &url, const nlohmann::json &body,
 							{
 								if (status.empty())
 								{
+									set_current_device(device.id);
 									this->put(get_device_url(url, device), body, callback);
 								}
 							});
@@ -350,7 +353,7 @@ void api::put(const std::string &url, const nlohmann::json &body,
 		});
 }
 
-void api::put(const std::string &url, lib::callback<std::string> &callback)
+void lib::spt::api::put(const std::string &url, lib::callback<std::string> &callback)
 {
 	put(url, nlohmann::json(), callback);
 }
@@ -359,7 +362,7 @@ void api::put(const std::string &url, lib::callback<std::string> &callback)
 
 //region POST
 
-void api::post(const std::string &url, lib::callback<std::string> &callback)
+void lib::spt::api::post(const std::string &url, lib::callback<std::string> &callback)
 {
 	auto headers = auth_headers();
 	headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -370,7 +373,7 @@ void api::post(const std::string &url, lib::callback<std::string> &callback)
 	});
 }
 
-void api::post(const std::string &url, const nlohmann::json &json,
+void lib::spt::api::post(const std::string &url, const nlohmann::json &json,
 	lib::callback<nlohmann::json> &callback)
 {
 	auto headers = auth_headers();
@@ -406,7 +409,7 @@ void api::post(const std::string &url, const nlohmann::json &json,
 
 //region DELETE
 
-void api::del(const std::string &url, const nlohmann::json &json,
+void lib::spt::api::del(const std::string &url, const nlohmann::json &json,
 	lib::callback<std::string> &callback)
 {
 	auto headers = auth_headers();
@@ -423,7 +426,7 @@ void api::del(const std::string &url, const nlohmann::json &json,
 		});
 }
 
-void api::del(const std::string &url, lib::callback<std::string> &callback)
+void lib::spt::api::del(const std::string &url, lib::callback<std::string> &callback)
 {
 	del(url, nlohmann::json(), callback);
 }

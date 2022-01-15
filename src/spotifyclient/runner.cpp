@@ -1,7 +1,7 @@
 #include "spotifyclient/runner.hpp"
 #include "mainwindow.hpp"
 
-QList<QPair<QDateTime, QString>> SpotifyClient::Runner::log;
+std::vector<lib::log_message> SpotifyClient::Runner::log;
 
 SpotifyClient::Runner::Runner(const lib::settings &settings,
 	const lib::paths &paths, QWidget *parent)
@@ -115,11 +115,6 @@ auto SpotifyClient::Runner::start() -> QString
 	}
 
 	auto backend = QString::fromStdString(settings.spotify.backend);
-	if (backend.isEmpty() && supportsPulse())
-	{
-		backend = "pulseaudio";
-	}
-
 	if (!backend.isEmpty())
 	{
 		arguments.append({
@@ -161,11 +156,6 @@ auto SpotifyClient::Runner::availableBackends() -> QStringList
 	return SpotifyClient::Helper::availableBackends(path);
 }
 
-auto SpotifyClient::Runner::supportsPulse() -> bool
-{
-	return SpotifyClient::Helper::supportsPulse(path);
-}
-
 auto SpotifyClient::Runner::isRunning() const -> bool
 {
 	return process == nullptr
@@ -173,7 +163,7 @@ auto SpotifyClient::Runner::isRunning() const -> bool
 		: process->isOpen();
 }
 
-void SpotifyClient::Runner::logOutput(const QByteArray &output)
+void SpotifyClient::Runner::logOutput(const QByteArray &output, lib::log_type logType)
 {
 	for (auto &line: QString(output).split('\n'))
 	{
@@ -181,21 +171,22 @@ void SpotifyClient::Runner::logOutput(const QByteArray &output)
 		{
 			continue;
 		}
-		log << QPair<QDateTime, QString>(QDateTime::currentDateTime(), line);
+
+		log.emplace_back(lib::date_time::now(), logType, line.toStdString());
 	}
 }
 
 void SpotifyClient::Runner::readyRead() const
 {
-	logOutput(process->readAllStandardOutput());
+	logOutput(process->readAllStandardOutput(), lib::log_type::information);
 }
 
 void SpotifyClient::Runner::readyError() const
 {
-	logOutput(process->readAllStandardError());
+	logOutput(process->readAllStandardError(), lib::log_type::error);
 }
 
-auto SpotifyClient::Runner::getLog() -> const QList<QPair<QDateTime, QString>> &
+auto SpotifyClient::Runner::getLog() -> const std::vector<lib::log_message> &
 {
 	return log;
 }

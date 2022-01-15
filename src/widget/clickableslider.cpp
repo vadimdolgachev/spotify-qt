@@ -1,22 +1,25 @@
-#include "clickableslider.hpp"
+#include "widget/clickableslider.hpp"
+
+#include <QApplication>
 
 ClickableSlider::ClickableSlider(Qt::Orientation orientation, QWidget *parent)
-	: QSlider(orientation, parent)
+	: QSlider(orientation, parent),
+	enabled(!styleHasClickSupport())
 {
 }
 
-void ClickableSlider::mousePressEvent(QMouseEvent *ev)
+void ClickableSlider::mousePressEvent(QMouseEvent *event)
 {
-	QSlider::mousePressEvent(ev);
+	QSlider::mousePressEvent(event);
 
-	if (ev->button() == Qt::LeftButton)
+	if (enabled && event->button() == Qt::LeftButton)
 	{
-		setValue(valueFromPos(ev->pos()));
+		setValue(valueFromPos(event->pos()));
 	}
 	emit sliderReleased();
 }
 
-int ClickableSlider::valueFromPos(const QPoint &pos)
+auto ClickableSlider::valueFromPos(const QPoint &pos) -> int
 {
 	QStyleOptionSlider styleOption;
 	initStyleOption(&styleOption);
@@ -47,4 +50,11 @@ int ClickableSlider::valueFromPos(const QPoint &pos)
 	auto posVal = orientation() == Qt::Horizontal ? posRect.x() : posRect.y();
 	return QStyle::sliderValueFromPosition(minimum(), maximum(), posVal - sliderMin,
 		sliderMax - sliderMin, styleOption.upsideDown);
+}
+
+auto ClickableSlider::styleHasClickSupport() -> bool
+{
+	// TODO: This would be better to do automatically, but this work for now
+	const auto &style = QApplication::style()->objectName();
+	return style == "kvantum" || style == "kvantum-dark";
 }

@@ -5,7 +5,7 @@
 #include "lib/search/api.hpp"
 
 #include "util/icon.hpp"
-#include "util/urlutils.hpp"
+#include "util/url.hpp"
 
 #include <QMenu>
 
@@ -21,6 +21,8 @@ namespace Menu
 		const lib::spt::artist &artist;
 		lib::ddg::api ddg;
 		QAction *loading = nullptr;
+
+		void addLink(const std::string &title, const std::string &url);
 
 		void onAboutToShow();
 		void onDuckDuckGo(bool checked);

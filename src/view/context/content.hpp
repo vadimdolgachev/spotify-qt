@@ -5,9 +5,9 @@
 #include "lib/cache.hpp"
 
 #include "spotify/current.hpp"
-#include "menu/songmenu.hpp"
+#include "menu/track.hpp"
 #include "util/icon.hpp"
-#include "util/imageutils.hpp"
+#include "util/image.hpp"
 #include "view/context/nowplaying.hpp"
 
 #include <QWidget>
@@ -30,7 +30,7 @@ namespace Context
 		auto getCurrentlyPlaying() const -> const lib::spt::track &;
 		void setCurrentlyPlaying(const lib::spt::track &track);
 
-		void setAlbum(const QPixmap &pixmap);
+		void setAlbum(const lib::spt::entity &albumEntity, const QPixmap &albumImage);
 
 	private:
 		/** Width and height of album */

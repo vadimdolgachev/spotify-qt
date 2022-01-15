@@ -4,7 +4,6 @@ SettingsPage::Application::Application(lib::settings &settings, QWidget *parent)
 	: SettingsPage::Base(settings, parent)
 {
 	addTab(app(), "General");
-	addTab(appLogs(), "Logs");
 }
 
 auto SettingsPage::Application::app() -> QWidget *
@@ -47,16 +46,6 @@ auto SettingsPage::Application::app() -> QWidget *
 
 	layout->addLayout(comboBoxLayout);
 
-	// PulseAudio volume control
-	if (isPulse())
-	{
-		appPulse = new QCheckBox("PulseAudio volume control", this);
-		appPulse->setToolTip(
-			"Use PulseAudio for volume control instead, only works if listening on same device");
-		appPulse->setChecked(settings.general.pulse_volume);
-		layout->addWidget(appPulse);
-	}
-
 	// MPRIS D-Bus
 #ifdef USE_DBUS
 	appMedia = new QCheckBox("Media controller", this);
@@ -72,11 +61,6 @@ auto SettingsPage::Application::app() -> QWidget *
 	layout->addWidget(appWhatsNew);
 
 	return Widget::layoutToWidget(layout, this);
-}
-
-auto SettingsPage::Application::appLogs() -> QWidget *
-{
-	return new LogView(this);
 }
 
 auto SettingsPage::Application::icon() -> QIcon
@@ -102,14 +86,7 @@ auto SettingsPage::Application::save() -> bool
 		settings.general.media_controller = appMedia->isChecked();
 	}
 
-	// PulseAudio volume
-	if (appPulse != nullptr)
-	{
-		settings.general.pulse_volume = appPulse->isChecked();
-	}
-
 	// Refresh interval
-
 	if (appRefresh != nullptr)
 	{
 		auto ok = false;
@@ -142,10 +119,4 @@ auto SettingsPage::Application::save() -> bool
 	}
 
 	return true;
-}
-
-auto SettingsPage::Application::isPulse() -> bool
-{
-	// Assume /usr/bin/pactl
-	return QFileInfo("/usr/bin/pactl").isExecutable();
 }

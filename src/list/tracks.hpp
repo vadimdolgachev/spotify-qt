@@ -3,7 +3,7 @@
 #include "lib/cache.hpp"
 #include "lib/set.hpp"
 #include "spotify/current.hpp"
-#include "menu/songmenu.hpp"
+#include "menu/track.hpp"
 #include "enum/column.hpp"
 
 #include <QListWidget>
@@ -27,6 +27,13 @@ namespace List
 		 * Load tracks directly, without cache, but select an item
 		 */
 		void load(const std::vector<lib::spt::track> &tracks, const std::string &selectedId);
+
+		/**
+		 * Load tracks directly, without cache,
+		 * but select an item and provide a fallback added date
+		 */
+		void load(const std::vector<lib::spt::track> &tracks, const std::string &selectedId,
+			const std::string &addedAt);
 
 		/**
 		 * Load tracks directly, without cache

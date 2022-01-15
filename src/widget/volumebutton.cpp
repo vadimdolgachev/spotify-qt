@@ -3,62 +3,55 @@
 
 VolumeButton::VolumeButton(lib::settings &settings, lib::spt::api &spotify, QWidget *parent)
 	: QToolButton(parent),
-	volume(new QSlider(this)),
 	settings(settings),
 	spotify(spotify)
 {
 	// Volume slider
+	volume = new QSlider(this);
 	volume->setOrientation(Qt::Orientation::Vertical);
 	volume->setFixedHeight(height);
+	volume->setFixedWidth(width);
 	volume->setMinimum(minimum);
 	volume->setMaximum(maximum);
-	volume->setValue(settings.general.last_volume > minimum
-		? settings.general.last_volume
-		: static_cast<int>(SpotifyClient::Helper::getVolume() * 20.F));
+
+	// Assume no volume is full volume
+	auto volumeValue = settings.general.last_volume;
+	if (volumeValue == minimum)
+	{
+		volumeValue = maximum;
+	}
+	volume->setValue(volumeValue);
 
 	// Layout for volume slider
 	auto *volumeMenu = new QMenu(this);
-	volumeMenu->setContentsMargins(vMargin, hMargin, vMargin, hMargin);
+
+	volumeUp = createButton("+");
+	QPushButton::connect(volumeUp, &QPushButton::clicked,
+		this, &VolumeButton::onVolumeUp);
+
+	volumeDown = createButton("-");
+	QPushButton::connect(volumeDown, &QPushButton::clicked,
+		this, &VolumeButton::onVolumeDown);
+
 	auto *volumeLayout = new QVBoxLayout();
+	volumeLayout->addWidget(volumeUp);
 	volumeLayout->addWidget(volume);
+	volumeLayout->addWidget(volumeDown);
 	volumeMenu->setLayout(volumeLayout);
 
-	setText("Volume");
-	updateIcon();
+	setText(QStringLiteral("Volume"));
+	update(volumeValue);
 	setPopupMode(QToolButton::InstantPopup);
 	setMenu(volumeMenu);
 
-	QAbstractSlider::connect(volume, &QAbstractSlider::valueChanged, [this](int /*value*/)
-	{
-		updateIcon();
-	});
+	QAbstractSlider::connect(volume, &QAbstractSlider::valueChanged,
+		this, &VolumeButton::onVolumeValueChanged);
 
-	if (settings.general.pulse_volume)
-	{
-		// If using PulseAudio for volume control, update on every tick
-		QSlider::connect(volume, &QAbstractSlider::valueChanged, [](int value)
-		{
-			SpotifyClient::Helper::setVolume(static_cast<float>(value) * 0.05f);
-		});
-	}
-	else
-	{
-		// If using Spotify for volume control, only update on release
-		QSlider::connect(volume, &QAbstractSlider::sliderReleased, [this]()
-		{
-			this->spotify.set_volume(volume->value() * step,
-				[](const std::string &status)
-				{
-					if (status.empty())
-					{
-						return;
-					}
+	QAbstractSlider::connect(volume, &QAbstractSlider::sliderPressed,
+		this, &VolumeButton::onVolumeSliderPressed);
 
-					StatusMessage::error(QString("Failed to set volume: %1")
-						.arg(QString::fromStdString(status)));
-				});
-		});
-	}
+	QAbstractSlider::connect(volume, &QAbstractSlider::sliderReleased,
+		this, &VolumeButton::onVolumeSliderReleased);
 }
 
 VolumeButton::~VolumeButton()
@@ -73,18 +66,103 @@ void VolumeButton::wheelEvent(QWheelEvent *event)
 	event->accept();
 }
 
-void VolumeButton::updateIcon()
+void VolumeButton::update(int value)
 {
-	auto vol = volume->value();
 	setIcon(Icon::get(QString("audio-volume-%1")
-		.arg(vol < lowVolume
-			? "low"
-			: vol > highVolume
-				? "high"
-				: "medium")));
+		.arg(getVolumeLevel(value))));
+
+	setToolTip(getVolumeInfo(value));
+
+	volumeUp->setEnabled(value < maximum);
+	volumeDown->setEnabled(value > minimum);
+}
+
+auto VolumeButton::getVolumeLevel(int value) -> QString
+{
+	if (value < lowVolume)
+	{
+		return QStringLiteral("low");
+	}
+
+	if (value > highVolume)
+	{
+		return QStringLiteral("high");
+	}
+
+	return QStringLiteral("medium");
+}
+
+auto VolumeButton::getVolumeInfo(int value) -> QString
+{
+	return QString("%1 %")
+		.arg(value * step);
 }
 
 void VolumeButton::setVolume(int value)
 {
+	if (changing)
+	{
+		return;
+	}
+
 	volume->setValue(value);
+}
+
+void VolumeButton::onVolumeValueChanged(int value)
+{
+	update(value);
+}
+
+void VolumeButton::onVolumeSliderPressed()
+{
+	changing = true;
+}
+
+void VolumeButton::onVolumeSliderReleased()
+{
+	changing = false;
+	setSpotifyVolume(volume->value());
+}
+
+void VolumeButton::changeVolume(int steps)
+{
+	const auto value = volume->value() + steps;
+	volume->setValue(value);
+	setSpotifyVolume(value);
+}
+
+void VolumeButton::onVolumeUp(bool /*checked*/)
+{
+	changeVolume(1);
+}
+
+void VolumeButton::onVolumeDown(bool /*checked*/)
+{
+	changeVolume(-1);
+}
+
+void VolumeButton::setSpotifyVolume(int value)
+{
+	spotify.set_volume(value * step, [](const std::string &status)
+	{
+		if (!status.empty())
+		{
+			StatusMessage::error(QString("Failed to set volume: %1")
+				.arg(QString::fromStdString(status)));
+		}
+	});
+}
+
+auto VolumeButton::createButton(const QString &text) -> QPushButton *
+{
+	auto *button = new QPushButton(text, this);
+	button->setFlat(true);
+	button->setFocusPolicy(Qt::NoFocus);
+	button->setFixedWidth(width);
+
+	auto font = button->font();
+	font.setPointSize(14);
+	button->setFont(font);
+
+	return button;
 }

@@ -5,41 +5,52 @@ CacheView::CacheView(const lib::paths &paths, QWidget *parent)
 	paths(paths)
 {
 	setHeaderLabels({
-		"Folder",
-		"Files",
-		"Size",
+		QStringLiteral("Folder"),
+		QStringLiteral("Files"),
+		QStringLiteral("Size"),
 	});
 	setRootIsDecorated(false);
 
 	setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-	QWidget::connect(this, &QWidget::customContextMenuRequested, this, &CacheView::menu);
+	QWidget::connect(this, &QWidget::customContextMenuRequested,
+		this, &CacheView::menu);
 }
 
 auto CacheView::fullName(const QString &folderName) -> QString
 {
 	if (folderName == "album")
 	{
-		return "Album covers";
+		return QStringLiteral("Album covers");
 	}
+
+	if (folderName == "albuminfo")
+	{
+		return QStringLiteral("Albums");
+	}
+
 	if (folderName == "librespot")
 	{
-		return "Librespot cache";
+		return QStringLiteral("Librespot cache");
 	}
+
 	if (folderName == "playlist")
 	{
-		return "Playlists";
+		return QStringLiteral("Playlists");
 	}
+
 	if (folderName == "qmlcache")
 	{
-		return "spotify-qt-quick cache";
+		return QStringLiteral("spotify-qt-quick cache");
 	}
+
 	if (folderName == "tracks")
 	{
-		return "Album and library";
+		return QStringLiteral("Album and library");
 	}
+
 	if (folderName == "lyrics")
 	{
-		return "Lyrics";
+		return QStringLiteral("Lyrics");
 	}
 
 	return folderName;
@@ -74,7 +85,7 @@ void CacheView::menu(const QPoint &pos)
 			"Open folder"),
 		&QAction::triggered, [this, folder](bool /*checked*/)
 		{
-			UrlUtils::open(folder, LinkType::Path, this);
+			Url::open(folder, LinkType::Path, this);
 		});
 	menu->popup(mapToGlobal(pos));
 }

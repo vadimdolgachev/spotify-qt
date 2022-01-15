@@ -10,8 +10,15 @@ public:
 	ClickableSlider(Qt::Orientation orientation, QWidget *parent);
 
 protected:
-	void mousePressEvent(QMouseEvent *ev) override;
+	void mousePressEvent(QMouseEvent *event) override;
 
 private:
-	int valueFromPos(const QPoint &pos);
+	bool enabled = true;
+
+	auto valueFromPos(const QPoint &pos) -> int;
+
+	/**
+	 * If style already implements custom click handling
+	 */
+	static auto styleHasClickSupport() -> bool;
 };

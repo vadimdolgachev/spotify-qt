@@ -46,7 +46,7 @@ void Artist::AlbumsList::setAlbums(const std::vector<lib::spt::album> &albums)
 
 	for (const auto &album: albums)
 	{
-		const auto releaseDate = DateUtils::fromIso(album.release_date);
+		const auto releaseDate = DateTime::parseIso(album.release_date);
 		// Extra spacing is intentional so year doesn't overlap with scrollbar
 		const auto year = releaseDate.toString("yyyy    ");
 
@@ -57,7 +57,7 @@ void Artist::AlbumsList::setAlbums(const std::vector<lib::spt::album> &albums)
 			albumName, year.isEmpty() ? QString() : year
 		});
 
-		HttpUtils::getAlbum(album.image, httpClient, cache, [item](const QPixmap &image)
+		Http::getAlbum(album.image, httpClient, cache, [item](const QPixmap &image)
 		{
 			if (item != nullptr)
 			{
@@ -122,10 +122,7 @@ void Artist::AlbumsList::onItemClicked(QTreeWidgetItem *item, int /*column*/)
 	}
 
 	auto *mainWindow = MainWindow::find(parentWidget());
-	if (!mainWindow->loadAlbum(id))
-	{
-		StatusMessage::error(QStringLiteral("Failed to load album"));
-	}
+	mainWindow->loadAlbum(id);
 }
 
 void Artist::AlbumsList::onItemDoubleClicked(QTreeWidgetItem *item, int /*column*/)

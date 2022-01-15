@@ -31,8 +31,8 @@ MainMenu::MainMenu(lib::spt::api &spotify, lib::settings &settings,
 	addMenu(deviceMenu);
 
 	// Refresh and settings
-	auto *openSettings = MenuUtils::createAction("configure",
-		"Settings...", this, QKeySequence::Preferences);
+	auto *openSettings = MenuAction::create("configure", "Settings...",
+		this, QKeySequence::Preferences);
 	QAction::connect(openSettings, &QAction::triggered,
 		this, &MainMenu::onOpenSettings);
 	addAction(openSettings);
@@ -46,12 +46,11 @@ MainMenu::MainMenu(lib::spt::api &spotify, lib::settings &settings,
 
 	// Log out and quit
 	addSeparator();
-	auto *quitAction = MenuUtils::createAction("application-exit",
-		"Quit", this, QKeySequence::Quit);
+	auto *quitAction = MenuAction::create("application-exit", "Quit",
+		this, QKeySequence::Quit);
 	QAction::connect(quitAction, &QAction::triggered, QCoreApplication::quit);
 
-	auto *logOutAction = MenuUtils::createAction("im-user-away",
-		"Log out", this);
+	auto *logOutAction = MenuAction::create("im-user-away", "Log out", this);
 	QAction::connect(logOutAction, &QAction::triggered,
 		this, &MainMenu::logOut);
 
@@ -180,8 +179,7 @@ void MainMenu::checkForUpdate(const std::string &data)
 		QAction::connect(about, &QAction::triggered, [this]()
 		{
 			QString url("https://github.com/kraxarn/spotify-qt/releases/latest");
-			UrlUtils::open(url, LinkType::Web,
-				MainWindow::find(this->parentWidget()));
+			Url::open(url, LinkType::Web, MainWindow::find(this->parentWidget()));
 		});
 	}
 }
