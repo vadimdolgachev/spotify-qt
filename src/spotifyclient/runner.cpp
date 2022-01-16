@@ -12,6 +12,9 @@ SpotifyClient::Runner::Runner(const lib::settings &settings,
 {
 	path = QString::fromStdString(settings.spotify.path);
 	process = new QProcess(parent);
+    connect(process, &QProcess::started, [this]() {
+        emit started();
+    });
 	clientType = SpotifyClient::Helper::clientType(path);
 }
 
@@ -92,15 +95,14 @@ auto SpotifyClient::Runner::start() -> QString
 	// Common arguments
 	QStringList arguments({
 		"--bitrate", QString::number(static_cast<int>(settings.spotify.bitrate)),
-		"--username", username,
-		"--password", password
+        "--username", username
 	});
 
 	// librespot specific
 	if (clientType == lib::client_type::librespot)
 	{
 		arguments.append({
-			"--name", QString("%1 (librespot)").arg(APP_NAME),
+            "--device-name", QString("%1 (librespot)").arg(APP_NAME),
 			"--initial-volume", "100",
 			"--autoplay",
 			"--cache", QString::fromStdString(paths.cache() / "librespot"),
@@ -108,10 +110,10 @@ auto SpotifyClient::Runner::start() -> QString
 	}
 	else if (clientType == lib::client_type::spotifyd)
 	{
-		arguments.append({
-			"--no-daemon",
-			"--device-name", QString("%1 (spotifyd)").arg(APP_NAME),
-		});
+        arguments.append({
+            "--no-daemon",
+            "--device-name", APP_NAME,}
+		);
 	}
 
 	auto backend = QString::fromStdString(settings.spotify.backend);

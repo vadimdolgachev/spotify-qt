@@ -36,6 +36,9 @@ namespace SpotifyClient
 		static auto getLog() -> const std::vector<lib::log_message> &;
 		auto isRunning() const -> bool;
 
+    signals:
+        void started();
+
 	private:
 		QProcess *process = nullptr;
 		QWidget *parentWidget = nullptr;

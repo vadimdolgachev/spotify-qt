@@ -84,7 +84,6 @@ MainWindow::MainWindow(lib::settings &settings, lib::paths &paths)
 		this->currentUser = user;
 	});
 
-	initDevice();
 	setBorderless(!settings.qt().system_title_bar);
 
 	splash.finish(this);
@@ -154,7 +153,7 @@ void MainWindow::initWhatsNew()
 void MainWindow::initDevice()
 {
 	spotify->devices([this](const std::vector<lib::spt::device> &devices)
-	{
+    {
 		// Don't select a new device if one is currently active
 		for (const auto &device: devices)
 		{
@@ -162,11 +161,19 @@ void MainWindow::initDevice()
 			{
 				return;
 			}
-		}
 
+            if (device.name == APP_NAME)
+            {
+                spotify->set_device(device, {});
+                return;
+            }
+        }
+
+        bool isSetDevice = false;
 		if (devices.size() == 1
 			&& lib::strings::starts_with(devices.front().name, APP_NAME))
-		{
+        {
+            isSetDevice = true;
 			spotify->set_device(devices.front(), {});
 		}
 		else
@@ -175,11 +182,17 @@ void MainWindow::initDevice()
 			{
 				if (device.id == this->settings.general.last_device)
 				{
-					spotify->set_device(device, {});
+                    isSetDevice = true;
+                    spotify->set_device(device, {});
 					break;
-				}
+                }
 			}
 		}
+        if (!isSetDevice) {
+            const long intervalMs = 1000;
+            lib::log::debug("init device after {} ms", intervalMs);
+            QTimer::singleShot(intervalMs, [this] {initDevice();});
+        }
 	});
 }
 
@@ -362,6 +375,10 @@ auto MainWindow::startClient() -> bool
 
 	spotifyRunner = new SpotifyClient::Runner(settings, paths, this);
 	auto status = spotifyRunner->start();
+    connect(spotifyRunner, &SpotifyClient::Runner::started, [this]{
+        initDevice();
+    });
+
 	if (!status.isEmpty())
 	{
 		QMessageBox::warning(this, "Client error",

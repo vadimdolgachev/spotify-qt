@@ -16,6 +16,10 @@
 
 auto main(int argc, char *argv[]) -> int
 {
+    qInstallMessageHandler([](QtMsgType, const QMessageLogContext &, const QString &msg){
+        std::cout << qPrintable(msg) << std::endl;
+    });
+
 	// Set name for settings etc.
 	QCoreApplication::setOrganizationName(ORG_NAME);
 	QCoreApplication::setApplicationName(APP_NAME);

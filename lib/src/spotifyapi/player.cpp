@@ -25,6 +25,7 @@ void lib::spt::api::set_device(const std::string &device_id, lib::callback<std::
 
 void lib::spt::api::set_device(const device &device, lib::callback<std::string> &callback)
 {
+    lib::log::debug("set device name={}", device.name);
 	set_device(device.id, callback);
 }
 
